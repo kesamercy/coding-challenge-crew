@@ -1,0 +1,31 @@
+Algorithm Plan for Absence Manager:
+
+- Go through the list of absecences 
+
+- return the name of the user --- col. value of name 
+
+- get the reason for the absence ---- col. value of absent 
+
+- genereate the ical file to import into out look
+
+- should be able to see the employee as "is on vaccation" and "member is sick"
+
+-
+
+==============================================================================================
+
+Tests to be written:
+
+- test if every absence has a name 
+
+- test if it has a reason
+
+- what happens if it has a name without a reason???
+
+- what happens if there is a reason without a name???
+
+
+
+=============================================================================================
+
+Attempt the bonus part if there is time....
