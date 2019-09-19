@@ -1,17 +1,11 @@
 Algorithm Plan for Absence Manager:
 
-- Go through the list of absecences 
+Logic behind the methods:
 
-- return the name of the user --- col. value of name 
-
-- get the reason for the absence ---- col. value of absent 
-
-- genereate the ical file to import into out look
-
-- should be able to see the employee as "is on vaccation" and "member is sick"
-
--
-
+absent employees 
+    - returning the employees  absent and the days on which they are absent
+    - returning the date the requested for the absence and the date of their absence 
+    - made sense to do so in order for the employer to know if someone took absence before it was granted
 ==============================================================================================
 
 Tests to be written:
