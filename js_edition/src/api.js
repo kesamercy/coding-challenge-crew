@@ -96,64 +96,41 @@ function generateIcalData() {
         );
 
         for (let j = 0; j < datesForOneEmployee.length; j++) {
+            var newStartDate = parseDate(datesForOneEmployee[j].startDate);
+            var newEndDate = parseDate(datesForOneEmployee[j].endDate);
+
             const event = {
                 title: namesOfAbsentEmployees[index] +
-                    "is" +
-                    datesForOneEmployee[index].reasonForAbsence,
-                dtstart: [datesForOneEmployee[index].startDate],
-                dtend: [datesForOneEmployee[index].endDate],
-                status: "ABSENT"
+                    " is " +
+                    datesForOneEmployee[j].reasonForAbsence,
+                start: newStartDate,
+                end: newEndDate
             };
+            ics.createEvent(event, (error, value) => {
+                if (error) {
+                    console.log(error);
+                    return;
+                }
+
+                console.log(value);
+            });
         }
-
-        break;
     }
-
-    employeesAbsent.forEach(dates => {
-        console.log(employeesAbsent.get("Max"), "the names");
-        const event = {
-            title: employeesAbsent.keys() + "is" + dates.reasonForAbsence,
-            dtstart: dates.startDate,
-            dtend: dates.endDate,
-            status: "ABSENT"
-        };
-        icalAbsences.push(event);
-    });
-
-    // ics.createEvents(icalAbsences, (error, value) => {
-    //     icalAbsences.forEach(event => {
-    //         if (error) {
-    //             console.log(error);
-    //             return;
-    //         }
-    //         console.log(event);
-    //     });
-    // });
-
-    //get the list of absences for each user
-
-    //go through and generate an ical event for each user's absence
-
-    //out put the absences into a ics file
-
-    //download them
 }
 
-//generate the ical file
+function parseDate(oldDate) {
+    var newDate = oldDate.split("-");
 
-//get the reason why they are absent --- vaction
-
-//get the reason why they are asbent ----- sickness
-
-//generate multiple events for the days an employee is absent
-
-//generate multiple events for all the employees
+    for (let k = 0; k < newDate.length; k++) {
+        var intValueOfString = newDate[k];
+        newDate[k] = parseInt(intValueOfString, 10);
+    }
+    return newDate;
+}
 
 //save the output to ics file
 
 //use js function to download the ics file on a page
-
-//remove the repeated absencess from the list returned for each absence
 
 //think about modifiying the functions so you can load the data into memory
 
