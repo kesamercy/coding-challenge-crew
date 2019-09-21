@@ -1,26 +1,17 @@
 const fs = require("fs");
 const ics = require("ics");
-// var FileSaver = require("file-saver");
 
 // there is a better way to do the file reading but at the time when i was writing the code, for one reason or another, i couldn't get it to work with readFile
 // so i went with readFileSync due to the time constraints becasue it was important to get the code working in a given time, but i am fully aware that it is synchronous file reading is not the best option and ideally, should be done in asynchronus way, readFile!
-
-//create a gloabal variable tha has the names of the users that are absent
-var namesOfAbsentEmployees = [];
-
 const membersContentsFromFile = fs.readFileSync("json_files/members.json");
 const absencesContentsFromFile = fs.readFileSync("json_files/absences.json");
-
 const members = JSON.parse(membersContentsFromFile);
 const absences = JSON.parse(absencesContentsFromFile);
 
+var namesOfAbsentEmployees = [];
+
 const listOfemployeesAbsent = absentEmployees(members, absences);
 generateIcalData();
-
-// test the ical on a separate file and see how it works
-//then transfer the data to the api.js file
-
-// console.log("list of employees absent", listOfemployeesAbsent);
 
 function absentEmployees() {
     var ListOfAllDaysAbsent = [];
@@ -86,10 +77,6 @@ function generateIcalData() {
     var employeesAbsent = absentEmployees();
     var icalAbsences = [];
 
-    //stopped when you were trying to loop through these elements..cart
-
-    //try the normal for loop or figure out how to use the for each loop
-
     for (let index = 0; index < namesOfAbsentEmployees.length; ++index) {
         var datesForOneEmployee = employeesAbsent.get(
             namesOfAbsentEmployees[index]
@@ -131,6 +118,8 @@ function parseDate(oldDate) {
 //save the output to ics file
 
 //use js function to download the ics file on a page
+
+//start working on the code optimization check list
 
 //think about modifiying the functions so you can load the data into memory
 
