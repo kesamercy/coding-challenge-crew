@@ -1,5 +1,5 @@
 const fs = require("fs");
-const ics = require("ics");
+var FileSaver = require("file-saver");
 
 // there is a better way to do the file reading but at the time when i was writing the code, for one reason or another, i couldn't get it to work with readFile
 // so i went with readFileSync due to the time constraints becasue it was important to get the code working in a given time, but i am fully aware that it is synchronous file reading is not the best option and ideally, should be done in asynchronus way, readFile!
@@ -12,6 +12,10 @@ var namesOfAbsentEmployees = [];
 
 const listOfemployeesAbsent = absentEmployees(members, absences);
 generateIcalData();
+
+function getNamesOfAbentEmployees() {
+    return namesOfAbsentEmployees;
+}
 
 function absentEmployees() {
     var ListOfAllDaysAbsent = [];
@@ -64,18 +68,8 @@ function getNameForUserId(userId) {
     }
 }
 
-//when the user clicks the download button
-function downloadEmployeeAbsences() {
-    //create a text file
-    //create the ical event and save it to the text file
-    //create an ical file to write the data to
-    // var blob = new Blob(["Hello, world!"], { type: "text/plain;charset=utf-8" });
-    // FileSaver.saveAs(blob, "hello world.txt");
-}
-
-function generateIcalData() {
+function generateIcalData(cal) {
     var employeesAbsent = absentEmployees();
-    var icalAbsences = [];
 
     for (let index = 0; index < namesOfAbsentEmployees.length; ++index) {
         var datesForOneEmployee = employeesAbsent.get(
@@ -86,21 +80,15 @@ function generateIcalData() {
             var newStartDate = parseDate(datesForOneEmployee[j].startDate);
             var newEndDate = parseDate(datesForOneEmployee[j].endDate);
 
-            const event = {
-                title: namesOfAbsentEmployees[index] +
-                    " is " +
-                    datesForOneEmployee[j].reasonForAbsence,
-                start: newStartDate,
-                end: newEndDate
-            };
-            ics.createEvent(event, (error, value) => {
-                if (error) {
-                    console.log(error);
-                    return;
-                }
-
-                console.log(value);
-            });
+            cal.addEvent(
+                namesOfAbsentEmployees[index] +
+                " is absent due to " +
+                datesForOneEmployee[j].reasonForAbsence,
+                "mercy is coming home",
+                "Bethlehem",
+                newStartDate,
+                newEndDate
+            );
         }
     }
 }
@@ -114,18 +102,3 @@ function parseDate(oldDate) {
     }
     return newDate;
 }
-
-//save the output to ics file
-
-//use js function to download the ics file on a page
-
-//start working on the code optimization check list
-
-//think about modifiying the functions so you can load the data into memory
-
-//create an on click event, when the button is clikced, then generate
-//the ical event and then download the ical event.
-
-//the create ical event is only called when the button is clicked
-
-//an ics file is generated and the contnet is read to the ics fiel..
