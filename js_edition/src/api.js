@@ -1,96 +1,95 @@
 const fs = require("fs");
-var FileSaver = require("file-saver");
+const ics = require("ics");
 
-// there is a better way to do the file reading but at the time when i was writing the code, for one reason or another, i couldn't get it to work with readFile
-// so i went with readFileSync due to the time constraints becasue it was important to get the code working in a given time, but i am fully aware that it is synchronous file reading is not the best option and ideally, should be done in asynchronus way, readFile!
 const membersContentsFromFile = fs.readFileSync("json_files/members.json");
 const absencesContentsFromFile = fs.readFileSync("json_files/absences.json");
+
 const members = JSON.parse(membersContentsFromFile);
 const absences = JSON.parse(absencesContentsFromFile);
+const absencesLength = absences.payload.length;
+const membersLength = members.payload.length;
+var namesOfgetListOfAbsentEmployees = [];
 
-var namesOfAbsentEmployees = [];
-
-const listOfemployeesAbsent = absentEmployees(members, absences);
+getListOfAbsentEmployees(members, absences);
 generateIcalData();
+writeToIcsFile();
 
-function getNamesOfAbentEmployees() {
-    return namesOfAbsentEmployees;
-}
-
-function absentEmployees() {
-    var ListOfAllDaysAbsent = [];
-    var employeeName = "none yet";
-    var userId = 0;
+function getListOfAbsentEmployees() {
     var collectionOfAllEmployeesAbsent = new Map();
-    const absencesLength = absences.payload.length;
-    var i = 0;
 
-    while (i < absencesLength) {
-        userId = absences.payload[i].userId;
-        ListOfAllDaysAbsent = getAllAbsentDatesForUserId(userId);
-        employeeName = getNameForUserId(userId);
-        collectionOfAllEmployeesAbsent.set(employeeName, ListOfAllDaysAbsent);
-        ++i;
+    for (let i = 0; i < absencesLength; ++i) {
+        var userId = absences.payload[i].userId;
+        var listOfAllDaysAbsent = getAllAbsentDatesForUserId(userId);
+        var employeeName = getNameForUserId(userId);
+        collectionOfAllEmployeesAbsent.set(employeeName, listOfAllDaysAbsent);
     }
     return collectionOfAllEmployeesAbsent;
 }
 
 function getAllAbsentDatesForUserId(userId) {
-    const absencesLength = absences.payload.length;
-    var ListOfAllDaysAbsent = [];
+    var listOfAllDaysAbsent = [];
 
     for (let i = 0; i < absencesLength; i++) {
         if (absences.payload[i].userId == userId) {
             var daysAbsent = {
-                startDate: 0,
-                endDate: 0,
-                reasonForAbsence: "noneyet"
+                startDate: absences.payload[i].startDate,
+                endDate: absences.payload[i].endDate,
+                reasonForAbsence: absences.payload[i].type
             };
-            daysAbsent.startDate = absences.payload[i].startDate;
-            daysAbsent.endDate = absences.payload[i].endDate;
-            daysAbsent.reasonForAbsence = absences.payload[i].type;
-            ListOfAllDaysAbsent.push(daysAbsent);
+            listOfAllDaysAbsent.push(daysAbsent);
         }
     }
-    return ListOfAllDaysAbsent;
+    return listOfAllDaysAbsent;
 }
 
 function getNameForUserId(userId) {
-    var membersLength = members.payload.length;
-    var userIdName = "none yet";
-
     for (let i = 0; i < membersLength; ++i) {
         if (members.payload[i].userId == userId) {
-            userIdName = members.payload[i].name;
-            namesOfAbsentEmployees.push(userIdName);
+            var userIdName = members.payload[i].name;
+            namesOfgetListOfAbsentEmployees.push(userIdName);
             return userIdName;
         }
     }
 }
 
-function generateIcalData(cal) {
-    var employeesAbsent = absentEmployees();
+function downloadEmployeeAbsences() {
+    //create a text file
+    //create the ical event and save it to the text file
+    //create an ical file to write the data to
+    // var blob = new Blob(["Hello, world!"], { type: "text/plain;charset=utf-8" });
+    // FileSaver.saveAs(blob, "hello world.txt");
+}
 
-    for (let index = 0; index < namesOfAbsentEmployees.length; ++index) {
+function generateIcalData() {
+    var employeesAbsent = getListOfAbsentEmployees();
+    var icalFormatForListOfAbsences = [];
+
+    for (let index = 0; index < namesOfgetListOfAbsentEmployees.length; ++index) {
         var datesForOneEmployee = employeesAbsent.get(
-            namesOfAbsentEmployees[index]
+            namesOfgetListOfAbsentEmployees[index]
         );
 
         for (let j = 0; j < datesForOneEmployee.length; j++) {
             var newStartDate = parseDate(datesForOneEmployee[j].startDate);
             var newEndDate = parseDate(datesForOneEmployee[j].endDate);
 
-            cal.addEvent(
-                namesOfAbsentEmployees[index] +
-                " is absent due to " +
-                datesForOneEmployee[j].reasonForAbsence,
-                "mercy is coming home",
-                "Bethlehem",
-                newStartDate,
-                newEndDate
-            );
+            const event = {
+                title: namesOfgetListOfAbsentEmployees[index] +
+                    " is absent due to " +
+                    datesForOneEmployee[j].reasonForAbsence,
+                start: newStartDate,
+                end: newEndDate
+            };
+            ics.createEvent(event, (error, value) => {
+                if (error) {
+                    console.log(error);
+                    return;
+                }
+                icalFormatForListOfAbsences.push(value);
+            });
         }
     }
+    return icalFormatForListOfAbsences;
 }
 
 function parseDate(oldDate) {
@@ -102,3 +101,28 @@ function parseDate(oldDate) {
     }
     return newDate;
 }
+
+function writeToIcsFile() {
+    var arrayOfAbsentEmployees = [];
+    arrayOfAbsentEmployees = generateIcalData();
+    stringOfAbsentEmployees = arrayOfAbsentEmployees.toString();
+
+    fs.writeFile("absentEmployees.ics", stringOfAbsentEmployees, err => {
+        if (err) throw err;
+
+        console.log("AbsentEmployees file saved!");
+    });
+}
+
+function getAbsencesForDateRange() {
+    //go to the file
+    //get all the dates
+    //sort the dates
+    //based on the defined start date
+    //go to the sorted file and push all the dates into array
+    //stop when you reach the defined end date.
+}
+
+module.exports = {
+    generateIcalData: generateIcalData
+};
