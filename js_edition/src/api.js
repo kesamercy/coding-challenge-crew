@@ -39,6 +39,7 @@ function getAllAbsentDatesForUserId(userId) {
             listOfAllDaysAbsent.push(daysAbsent);
         }
     }
+
     return listOfAllDaysAbsent;
 }
 
@@ -52,14 +53,6 @@ function getNameForUserId(userId) {
     }
 }
 
-function downloadEmployeeAbsences() {
-    //create a text file
-    //create the ical event and save it to the text file
-    //create an ical file to write the data to
-    // var blob = new Blob(["Hello, world!"], { type: "text/plain;charset=utf-8" });
-    // FileSaver.saveAs(blob, "hello world.txt");
-}
-
 function generateIcalData() {
     var employeesAbsent = getListOfAbsentEmployees();
     var icalFormatForListOfAbsences = [];
@@ -68,11 +61,9 @@ function generateIcalData() {
         var datesForOneEmployee = employeesAbsent.get(
             namesOfgetListOfAbsentEmployees[index]
         );
-
         for (let j = 0; j < datesForOneEmployee.length; j++) {
             var newStartDate = parseDate(datesForOneEmployee[j].startDate);
             var newEndDate = parseDate(datesForOneEmployee[j].endDate);
-
             const event = {
                 title: namesOfgetListOfAbsentEmployees[index] +
                     " is absent due to " +
@@ -114,15 +105,29 @@ function writeToIcsFile() {
     });
 }
 
-function getAbsencesForDateRange() {
-    //go to the file
-    //get all the dates
-    //sort the dates
-    //based on the defined start date
-    //go to the sorted file and push all the dates into array
-    //stop when you reach the defined end date.
+function getAbsencesForDateRange(startDateRequested, endDateRequested) {
+    var allDatesWhenEmployeesAbsentInRange = [];
+
+    for (let j = 0; j < absencesLength; j++) {
+        var beginDate = absences.payload[j].startDate;
+        var endingDate = absences.payload[j].endDate;
+        if (beginDate >= startDateRequested && endingDate <= endDateRequested) {
+            var userId = absences.payload[j].userId;
+            var name = getNameForUserId(userId);
+            var absentEmployee = {
+                startDate: beginDate,
+                endDate: endingDate,
+                employeeName: name
+            };
+            allDatesWhenEmployeesAbsentInRange.push(absentEmployee);
+        }
+    }
+    return allDatesWhenEmployeesAbsentInRange;
 }
 
 module.exports = {
-    generateIcalData: generateIcalData
+    generateIcalData: generateIcalData,
+    writeToIcsFile: writeToIcsFile,
+    getAllAbsentDatesForUserId: getAllAbsentDatesForUserId,
+    getAbsencesForDateRange: getAbsencesForDateRange
 };
