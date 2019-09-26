@@ -8,64 +8,21 @@ const members = JSON.parse(membersContentsFromFile);
 const absences = JSON.parse(absencesContentsFromFile);
 const absencesLength = absences.payload.length;
 const membersLength = members.payload.length;
-var namesOfgetListOfAbsentEmployees = [];
+var namesOfAbsentEmployees = [];
 
-getListOfAbsentEmployees(members, absences);
-generateIcalData();
-writeToIcsFile();
-
-function getListOfAbsentEmployees() {
-    var collectionOfAllEmployeesAbsent = new Map();
-
-    for (let i = 0; i < absencesLength; ++i) {
-        var userId = absences.payload[i].userId;
-        var listOfAllDaysAbsent = getAllAbsentDatesForUserId(userId);
-        var employeeName = getNameForUserId(userId);
-        collectionOfAllEmployeesAbsent.set(employeeName, listOfAllDaysAbsent);
-    }
-    return collectionOfAllEmployeesAbsent;
-}
-
-function getAllAbsentDatesForUserId(userId) {
-    var listOfAllDaysAbsent = [];
-
-    for (let i = 0; i < absencesLength; i++) {
-        if (absences.payload[i].userId == userId) {
-            var daysAbsent = {
-                startDate: absences.payload[i].startDate,
-                endDate: absences.payload[i].endDate,
-                reasonForAbsence: absences.payload[i].type
-            };
-            listOfAllDaysAbsent.push(daysAbsent);
-        }
-    }
-
-    return listOfAllDaysAbsent;
-}
-
-function getNameForUserId(userId) {
-    for (let i = 0; i < membersLength; ++i) {
-        if (members.payload[i].userId == userId) {
-            var userIdName = members.payload[i].name;
-            namesOfgetListOfAbsentEmployees.push(userIdName);
-            return userIdName;
-        }
-    }
-}
+runProgram();
 
 function generateIcalData() {
     var employeesAbsent = getListOfAbsentEmployees();
     var icalFormatForListOfAbsences = [];
 
-    for (let index = 0; index < namesOfgetListOfAbsentEmployees.length; ++index) {
-        var datesForOneEmployee = employeesAbsent.get(
-            namesOfgetListOfAbsentEmployees[index]
-        );
+    for (let i = 0; i < namesOfAbsentEmployees.length; ++i) {
+        var datesForOneEmployee = employeesAbsent.get(namesOfAbsentEmployees[i]);
         for (let j = 0; j < datesForOneEmployee.length; j++) {
             var newStartDate = parseDate(datesForOneEmployee[j].startDate);
             var newEndDate = parseDate(datesForOneEmployee[j].endDate);
             const event = {
-                title: namesOfgetListOfAbsentEmployees[index] +
+                title: namesOfAbsentEmployees[i] +
                     " is absent due to " +
                     datesForOneEmployee[j].reasonForAbsence,
                 start: newStartDate,
@@ -83,30 +40,8 @@ function generateIcalData() {
     return icalFormatForListOfAbsences;
 }
 
-function parseDate(oldDate) {
-    var newDate = oldDate.split("-");
-
-    for (let k = 0; k < newDate.length; k++) {
-        var intValueOfString = newDate[k];
-        newDate[k] = parseInt(intValueOfString, 10);
-    }
-    return newDate;
-}
-
-function writeToIcsFile() {
-    var arrayOfAbsentEmployees = [];
-    arrayOfAbsentEmployees = generateIcalData();
-    stringOfAbsentEmployees = arrayOfAbsentEmployees.toString();
-
-    fs.writeFile("absentEmployees.ics", stringOfAbsentEmployees, err => {
-        if (err) throw err;
-
-        console.log("AbsentEmployees file saved!");
-    });
-}
-
 function getAbsencesForDateRange(startDateRequested, endDateRequested) {
-    var allDatesWhenEmployeesAbsentInRange = [];
+    var employeeAbsencesInDateRange = [];
 
     for (let j = 0; j < absencesLength; j++) {
         var beginDate = absences.payload[j].startDate;
@@ -119,10 +54,73 @@ function getAbsencesForDateRange(startDateRequested, endDateRequested) {
                 endDate: endingDate,
                 employeeName: name
             };
-            allDatesWhenEmployeesAbsentInRange.push(absentEmployee);
+            employeeAbsencesInDateRange.push(absentEmployee);
         }
     }
-    return allDatesWhenEmployeesAbsentInRange;
+    return employeeAbsencesInDateRange;
+}
+
+function getAllAbsentDatesForUserId(userId) {
+    var listOfAllDaysAbsent = [];
+
+    for (let i = 0; i < absencesLength; i++) {
+        if (absences.payload[i].userId == userId) {
+            var daysAbsent = {
+                startDate: absences.payload[i].startDate,
+                endDate: absences.payload[i].endDate,
+                reasonForAbsence: absences.payload[i].type
+            };
+            listOfAllDaysAbsent.push(daysAbsent);
+        }
+    }
+    return listOfAllDaysAbsent;
+}
+
+function getListOfAbsentEmployees() {
+    var collectionOfAllEmployeesAbsent = new Map();
+
+    for (let i = 0; i < absencesLength; ++i) {
+        var userId = absences.payload[i].userId;
+        var listOfAllDaysAbsent = getAllAbsentDatesForUserId(userId);
+        var employeeName = getNameForUserId(userId);
+        collectionOfAllEmployeesAbsent.set(employeeName, listOfAllDaysAbsent);
+    }
+    return collectionOfAllEmployeesAbsent;
+}
+
+function getNameForUserId(userId) {
+    for (let i = 0; i < membersLength; ++i) {
+        if (members.payload[i].userId == userId) {
+            var userIdName = members.payload[i].name;
+            namesOfAbsentEmployees.push(userIdName);
+            return userIdName;
+        }
+    }
+}
+
+function parseDate(oldDate) {
+    var newDate = oldDate.split("-");
+
+    for (let k = 0; k < newDate.length; k++) {
+        var intValueOfString = newDate[k];
+        newDate[k] = parseInt(intValueOfString, 10);
+    }
+    return newDate;
+}
+
+function runProgram() {
+    generateIcalData();
+    writeToIcsFile();
+}
+
+function writeToIcsFile() {
+    var arrayOfAbsentEmployees = generateIcalData();
+    var stringOfAbsentEmployees = arrayOfAbsentEmployees.toString();
+
+    fs.writeFile("absentEmployees.ics", stringOfAbsentEmployees, err => {
+        if (err) throw err;
+        console.log("AbsentEmployees file saved!");
+    });
 }
 
 module.exports = {

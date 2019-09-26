@@ -15,7 +15,6 @@ app.get("/", (req, res) => {
         res.send(stringForDatesInRange);
     } else if (req.query.userid) {
         var userId = req.query.userid;
-        console.log(userId);
         var daysAbsentForUser = api.getAllAbsentDatesForUserId(userId);
         var stringOfDaysAbsent = JSON.stringify(daysAbsentForUser);
         res.send(stringOfDaysAbsent);

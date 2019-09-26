@@ -1,0 +1,7 @@
+
+Notes:
+
+1. When testing  http://localhost:3000?userId=123 , use "userid" instead of "userId". For some reason, it always auto corrected to "userid" when I entered a specfic userid number to test. 
+So I used "userid" as the query param to validate that the correct results were being returned. \
+
+Github link: https://github.com/kesamercy/coding-challenge-crew.git
